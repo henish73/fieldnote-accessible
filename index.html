@@ -10,7 +10,7 @@
    PICTURE: the results list itself, with labelled map pins where maps appear.
    COLOUR and TYPE: pale yellow paper, chestnut ink for actions, espresso text, a gold focus halo; system sans, 16px body.
    LAYOUT: search bar, visible type and filter controls, results with a side panel; stacks under 900px. */
-:root{color-scheme:light dark;
+:root{color-scheme:light;
   --bg:light-dark(#fbf3d5,#1c1310);--surface:light-dark(#fffbea,#2a1c16);--ink:light-dark(#2b1a12,#f7eed8);
   --muted:light-dark(#5e4636,#d8c4a5);--line:light-dark(#d9c79a,#5a4234);--ctl:light-dark(#8f6e4f,#a68a6e);--link:light-dark(#8a3a2b,#f2b49a);
   --brand:light-dark(#8a3a2b,#9c4532);--on-brand:#fff;--focus:light-dark(#2b1a12,#ffd84d);--halo:light-dark(#f2c94c,transparent);
@@ -18,7 +18,7 @@
   --paid-bg:light-dark(#f7ddc9,#4a2a1a);--paid-ink:light-dark(#6b2610,#ffcfb2);
   --ended-bg:light-dark(#ece3cf,#3a2e26);--ended-ink:light-dark(#4a3a2c,#e2d6c4);
   --sel:light-dark(#f6e3c6,#4a2d22)}
-:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+:root,:root[data-theme=light],:root[data-theme=dark]{color-scheme:light}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,"Segoe UI",Roboto,sans-serif;overflow-x:clip}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 7px var(--halo);border-radius:4px}
