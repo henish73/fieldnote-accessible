@@ -1,6 +1,6 @@
 # Fieldnote redesign test report
 
-Run: 2026-11-25 18:31 Â· headless Microsoft Edge Â· https://henish73.github.io/fieldnote-accessible/?v=4
+Run: 2026-11-25 18:31 - headless Microsoft Edge - https://henish73.github.io/fieldnote-accessible/?v=4
 
 **92 passed, 0 failed** (92 tests)
 

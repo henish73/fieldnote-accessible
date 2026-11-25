@@ -197,7 +197,7 @@ $sock.Dispose()
 & taskkill.exe /PID $proc.Id /T /F | Out-Null
 
 $pass = ($results | Where-Object Result -eq 'PASS').Count; $fail = ($results | Where-Object Result -eq 'FAIL').Count
-$md = @("# Fieldnote redesign test report", "", "Run: $(Get-Date -Format 'yyyy-MM-dd HH:mm') · headless Microsoft Edge · $Base", "", "**$pass passed, $fail failed** ($($results.Count) tests)", "")
+$md = @("# Fieldnote redesign test report", "", "Run: $(Get-Date -Format 'yyyy-MM-dd HH:mm') - headless Microsoft Edge - $Base", "", "**$pass passed, $fail failed** ($($results.Count) tests)", "")
 foreach ($grp in ($results | Select-Object -ExpandProperty Group -Unique)) {
   $md += "## $grp", "", "| Result | Test | Detail |", "| --- | --- | --- |"
   foreach ($r in ($results | Where-Object Group -eq $grp)) { $md += "| $($r.Result) | $($r.Test) | $(($r.Detail -replace '\|','/'))|" }
