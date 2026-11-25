@@ -6,95 +6,113 @@
 <title>Fieldnote – Accessible search</title>
 <style>
 /* VOICE: calm campus utility; plain words, nothing hidden behind hover.
-   IDEA: a well-labelled campus noticeboard you can walk with the Tab key.
-   PICTURE: the results list itself, with labelled map pins where maps appear.
-   COLOUR and TYPE: pale lilac paper, plum #672367 for actions, deep plum text, a gold focus halo; system sans, 16px body.
-   LAYOUT: search bar, visible type and filter controls, results with a side panel; stacks under 900px. */
+   IDEA: one quiet column you can walk with the Tab key: search, choose, read.
+   COLOUR and TYPE: near-white lilac paper, plum #672367 for every action, deep plum text, a gold focus halo; system sans, 17px body.
+   LAYOUT: slim top bar, one 760px column, no side panels; filters are two short rows; results are a plain list. */
 :root{color-scheme:light;
-  --bg:light-dark(#f8f1f7,#1c1310);--surface:light-dark(#fffaff,#2a1c16);--ink:light-dark(#2a1029,#f7eed8);
-  --muted:light-dark(#5b4459,#d8c4a5);--line:light-dark(#d8c3d5,#5a4234);--ctl:light-dark(#8a6a87,#a68a6e);--link:light-dark(#672367,#f2b49a);
-  --brand:light-dark(#672367,#9c4532);--on-brand:#fff;--focus:light-dark(#2a1029,#ffd84d);--halo:light-dark(#f2c94c,transparent);
-  --free-bg:light-dark(#e2efd2,#22351b);--free-ink:light-dark(#2d5a17,#c6e6ae);
-  --paid-bg:light-dark(#f7ddc9,#4a2a1a);--paid-ink:light-dark(#6b2610,#ffcfb2);
-  --ended-bg:light-dark(#ece4ea,#3a2e26);--ended-ink:light-dark(#4a3a48,#e2d6c4);
-  --sel:light-dark(#f1dcee,#4a2d22)}
-:root,:root[data-theme=light],:root[data-theme=dark]{color-scheme:light}
+  --bg:#fcf9fc;--paper:#fff;--ink:#2a1029;--muted:#5b4459;--line:#e6d8e4;--ctl:#8a6a87;
+  --brand:#672367;--on-brand:#fff;--tint:#f3e6f1;--focus:#2a1029;--halo:#f2c94c;
+  --free-bg:#e6f2dc;--free-ink:#2d5a17;--paid-bg:#f8e3d6;--paid-ink:#6b2610;--ended-bg:#eee6ec;--ended-ink:#4a3a48}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,"Segoe UI",Roboto,sans-serif;overflow-x:clip}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 7px var(--halo);border-radius:4px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,"Segoe UI",Roboto,sans-serif;overflow-x:clip}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;box-shadow:0 0 0 7px var(--halo);border-radius:6px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.skip{position:absolute;left:12px;top:-60px;background:var(--surface);color:var(--link);padding:10px 16px;border:2px solid var(--focus);border-radius:6px;z-index:10;font-weight:600}
-.skip:focus{top:10px}
-.wrap{max-width:1180px;margin:0 auto;padding:0 max(4vw,16px)}
-header{background:var(--surface);border-bottom:1px solid var(--line)}
-.head{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;padding-block:16px}
-.brand{display:inline-flex;align-items:center;gap:10px;font-size:26px;font-weight:800;letter-spacing:-.04em;color:var(--ink);background:none;border:0;cursor:pointer;min-height:44px;padding:0 4px;font-family:inherit}
-.mark{width:32px;height:32px;border-radius:9px;background:var(--brand);display:grid;place-items:center}
-.mark::before{content:"";width:13px;height:13px;border:3px solid #f2c94c;transform:rotate(45deg);border-radius:3px}
-form.search{flex:1 1 420px;position:relative}
-form.search label{display:block;font-weight:600;font-size:15px;margin-bottom:4px}
-.box{display:flex;gap:8px}
-.field{flex:1;position:relative;display:flex}
-#query{flex:1;height:48px;font:inherit;font-size:17px;padding:0 44px 0 14px;border:2px solid var(--ctl);border-radius:8px;background:var(--surface);color:var(--ink)}
-#query::-webkit-search-cancel-button{display:none}
-#clear{position:absolute;right:2px;top:2px;width:44px;height:44px;border:0;background:none;color:var(--muted);font-size:22px;cursor:pointer;border-radius:6px}
+[hidden]{display:none !important}
 button{font:inherit;color:inherit}
-.btn{min-height:48px;padding:0 20px;border-radius:8px;border:2px solid var(--brand);background:var(--brand);color:var(--on-brand);font-weight:700;cursor:pointer}
-.btn.quiet{background:var(--surface);color:var(--link)}
-#suggest{position:absolute;left:0;right:0;top:calc(100% + 4px);list-style:none;margin:0;padding:6px;background:var(--surface);border:2px solid var(--line);border-radius:8px;z-index:5;box-shadow:0 8px 24px #3a1d0e33}
-#suggest li{padding:10px 12px;border-radius:6px;cursor:pointer}
-#suggest li[aria-selected=true]{background:var(--sel);outline:2px solid var(--link)}
-.hint{font-size:14px;color:var(--muted);margin:6px 0 0}
-main{padding-block:24px 48px}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+
+/* skip links */
+.skips{position:absolute;left:12px;top:-120px;z-index:10;display:flex;gap:8px}
+.skips:focus-within{top:10px}
+.skips a{background:var(--paper);color:var(--brand);padding:10px 16px;border:2px solid var(--focus);border-radius:8px;font-weight:700}
+
+/* top bar */
+header{background:var(--paper);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;justify-content:space-between;min-height:60px}
+.brand{background:none;border:0;padding:0 6px;min-height:44px;cursor:pointer;font-size:21px;font-weight:800;letter-spacing:-.02em;color:var(--brand)}
+#back{margin-left:-6px}
+.linkbtn{background:none;border:0;padding:0 6px;min-height:44px;color:var(--brand);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-weight:600}
+
+/* search */
+.searchband{padding-top:28px;padding-bottom:4px}
+form.search label{display:block;font-weight:700;font-size:15px;margin:0 0 8px}
+.box{display:flex;align-items:center;gap:4px;background:var(--paper);border:2px solid var(--ctl);border-radius:999px;padding:4px 4px 4px 20px}
+.box:has(#query:focus-visible){border-color:var(--brand);outline:3px solid var(--focus);outline-offset:3px;box-shadow:0 0 0 7px var(--halo)}
+.field{flex:1;display:flex;position:relative}
+#query{flex:1;height:48px;border:0;background:none;font:inherit;font-size:18px;color:var(--ink)}
+#query:focus-visible{outline:none;box-shadow:none}
+#query::-webkit-search-cancel-button{display:none}
+#query[aria-invalid=true]{color:var(--ink)}
+.box:has(#query[aria-invalid=true]){border-color:#9e2316;border-width:3px}
+#clear{background:none;border:0;min-height:44px;padding:0 12px;color:var(--brand);font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.btn{min-height:48px;padding:0 24px;border-radius:999px;border:2px solid var(--brand);background:var(--brand);color:var(--on-brand);font-weight:700;cursor:pointer}
+.btn.quiet{background:var(--paper);color:var(--brand)}
+#suggest{position:absolute;left:-20px;right:0;top:calc(100% + 12px);list-style:none;margin:0;padding:6px;background:var(--paper);border:1px solid var(--line);border-radius:14px;z-index:5;box-shadow:0 10px 30px #2a102922}
+#suggest li{padding:10px 14px;border-radius:10px;cursor:pointer}
+#suggest li[aria-selected=true]{background:var(--tint);outline:2px solid var(--brand)}
+.hint{font-size:15px;color:var(--muted);margin:8px 0 0 22px}
+.error{color:#9e2316;font-weight:700;margin:8px 0 0 22px}
+
+/* page */
+main{padding-top:20px;padding-bottom:56px}
 main:focus{outline:none}
-h1{font-size:clamp(26px,3.4vw,34px);line-height:1.15;margin:0 0 6px;letter-spacing:-.02em;text-wrap:balance}
-h1:focus-visible{outline-offset:6px}
-.controls{display:flex;flex-wrap:wrap;gap:14px 32px;align-items:flex-end;margin:14px 0 8px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
-.controls h2,.controls legend{font-size:14px;font-weight:700;margin:0 0 6px;padding:0;color:var(--muted)}
-fieldset{border:0;margin:0;padding:0}
-.seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{min-height:44px;padding:0 16px;border:2px solid var(--ctl);border-radius:999px;background:var(--surface);cursor:pointer;font-weight:600}
-.seg button[aria-pressed=true]{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
-.seg button[aria-pressed=true]::before{content:"✓ "}
-.radios{display:flex;flex-wrap:wrap;gap:6px}
-.radios label{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:2px solid var(--ctl);border-radius:999px;cursor:pointer;font-weight:600}
-.radios input{width:18px;height:18px;margin:0;accent-color:var(--brand)}
-.radios label:has(input:checked){border-color:var(--brand);background:var(--sel)}
-.summary{margin:6px 0 16px;color:var(--muted)}
+h1{font-size:28px;line-height:1.2;margin:10px 0 18px;letter-spacing:-.01em;text-wrap:balance}
+h1:focus-visible{outline:none;border-radius:0;box-shadow:inset 0 -5px 0 var(--halo)}
+h2{font-size:17px;margin:0 0 8px}
+
+/* filters: two short rows */
+.controls{display:grid;gap:10px;margin:0 0 4px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;border:0;margin:0;padding:0}
+.row .lbl,.row legend{float:left;width:84px;font-size:15px;font-weight:700;color:var(--muted);padding:0}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px;background:var(--tint);padding:4px;border-radius:999px}
+.seg button,.seg label{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:0;border-radius:999px;background:none;font-weight:600;cursor:pointer;color:var(--ink)}
+.seg button[aria-pressed=true]{background:var(--brand);color:var(--on-brand)}
+.seg button[aria-pressed=true]::before{content:"✓"}
+.seg input{width:18px;height:18px;margin:0;accent-color:var(--brand)}
+.seg label:has(input:checked){background:var(--paper);color:var(--brand);box-shadow:inset 0 0 0 2px var(--brand)}
+.seg label:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:3px;box-shadow:inset 0 0 0 2px var(--brand),0 0 0 7px var(--halo)}
+.seg input:focus-visible{outline:none;box-shadow:none}
+.summary{font-size:15px;color:var(--muted);margin:12px 0 6px;padding:4px 8px;margin-left:-8px;border-radius:8px}
 .summary strong{color:var(--ink)}
-.linkbtn{background:none;border:0;padding:0 4px;min-height:44px;color:var(--link);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-weight:600}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start}
-@media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
-ol.results{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:10px}
-ol.results>li{padding:16px 20px;border-bottom:1px solid var(--line)}
-ol.results>li:last-child{border-bottom:0}
-.source{font-size:14px;color:var(--muted);margin:0}
-.results h2{margin:2px 0 4px;font-size:20px;line-height:1.3}
-.title{background:none;border:0;padding:2px 0;text-align:left;color:var(--link);font-weight:700;cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;min-height:44px}
-.desc{margin:0 0 8px}
-.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted);margin:0}
-.badge{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:13px;padding:3px 10px;border-radius:999px;border:1.5px solid currentColor}
+.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%{background:var(--halo)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none;background:var(--tint)}}
+
+/* results: a plain list */
+ol.results{list-style:none;margin:0;padding:0}
+ol.results>li{padding:18px 0;border-top:1px solid var(--line)}
+.results h3{margin:0 0 4px;font-size:20px;line-height:1.3}
+.title{background:none;border:0;padding:2px 0;text-align:left;color:var(--brand);font-weight:700;cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;min-height:44px}
+.desc{margin:0 0 6px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:15px;color:var(--muted);margin:0}
+.when strong{color:var(--ink)}
+.badge{font-size:14px;font-weight:700;padding:2px 10px;border-radius:999px}
 .badge.free{background:var(--free-bg);color:var(--free-ink)}
-.badge.paid{background:var(--paid-bg);color:var(--paid-ink);border-style:dashed}
+.badge.paid{background:var(--paid-bg);color:var(--paid-ink)}
 .badge.ended{background:var(--ended-bg);color:var(--ended-ink)}
-.badge.type{background:transparent;color:var(--muted)}
-nav.pages{display:flex;gap:8px;margin-top:16px;align-items:center;flex-wrap:wrap}
-nav.pages button{min-width:44px;min-height:44px;border:2px solid var(--ctl);border-radius:8px;background:var(--surface);cursor:pointer;font-weight:600}
-nav.pages button[aria-current=page]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
-aside{display:grid;gap:16px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
-.card h2{font-size:18px;margin:0 0 8px}
-.card ul{list-style:none;margin:0;padding:0}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:22px 24px;max-width:820px}
-.panel ul.try{padding-left:20px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:8px 0 0}
-.chips button{min-height:44px;padding:0 16px;border:2px solid var(--link);border-radius:999px;background:var(--surface);color:var(--link);font-weight:600;cursor:pointer}
-.kicker{font-size:14px;font-weight:700;color:var(--muted);margin:0 0 4px}
-.facts{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:12px 0}
-.facts dt{font-weight:700}.facts dd{margin:0}
-.map{position:relative;height:240px;border-radius:8px;overflow:hidden;border:1px solid var(--line);
+.group-h{font-size:15px;color:var(--muted);margin:26px 0 0}
+nav.pages{display:flex;gap:8px;margin-top:18px;align-items:center;flex-wrap:wrap;font-size:15px;color:var(--muted)}
+nav.pages button{min-width:44px;min-height:44px;border:0;border-radius:999px;background:var(--tint);cursor:pointer;font-weight:700}
+nav.pages button[aria-current=page]{background:var(--brand);color:var(--on-brand)}
+.more{margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+.more h2{font-size:15px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.chips button{min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid var(--ctl);background:var(--paper);color:var(--brand);font-weight:600;cursor:pointer}
+
+/* empty state and home */
+.lead{font-size:18px;margin:0 0 6px}
+.tips{color:var(--muted);margin:0 0 22px;padding-left:22px}
+.stack{display:grid;gap:22px;justify-items:start}
+
+/* detail */
+.kicker{font-size:14px;font-weight:700;color:var(--muted);margin:14px 0 0;text-transform:uppercase;letter-spacing:.06em}
+.facts{display:flex;flex-wrap:wrap;gap:8px 28px;margin:0 0 18px;padding:14px 0;border-block:1px solid var(--line)}
+.facts div{display:grid}.facts dt{font-size:14px;font-weight:700;color:var(--muted)}.facts dd{margin:0}
+.record{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:0 0 18px}
+.record p{margin:0;font-weight:600}
+.purpose{font-weight:600;margin:18px 0 8px}
+.map{position:relative;height:240px;border-radius:14px;overflow:hidden;border:1px solid var(--line);
   background:repeating-linear-gradient(24deg,#e3ead9 0 34px,#e9efe2 34px 73px,#dfe7d8 73px 105px)}
-.card .map{height:170px}
 .road{position:absolute;width:125%;height:17px;background:#fafaf4;border:1px solid #cfd7c8}
 .r1{left:-12%;top:28%;transform:rotate(-13deg)}.r2{left:-8%;top:62%;transform:rotate(10deg)}.r3{left:-12%;top:46%;transform:rotate(-66deg)}
 .area{position:absolute;font-size:12px;font-weight:700;color:#2f4a2c;background:#ffffffcc;padding:1px 6px;border-radius:4px}
@@ -103,69 +121,48 @@ aside{display:grid;gap:16px}
 .shape{width:30px;height:30px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;border:3px solid #fff;box-shadow:0 1px 4px #0006}
 .s0{border-radius:50%}.s1{border-radius:4px}.s2{transform:rotate(45deg);border-radius:3px}.s2 span{transform:rotate(-45deg)}.s3{border-radius:50% 50% 4px 4px}
 .pin .tag{background:#fff;color:#172033;font-size:13px;font-weight:700;padding:2px 7px;border-radius:5px;border:1px solid #9aa5b8;white-space:nowrap}
-ol.places{padding:0;list-style:none;display:grid;gap:8px}
+ol.places{padding:0;list-style:none;display:grid;gap:8px;margin:12px 0 0}
 ol.places li{display:flex;gap:10px;align-items:center}
 ol.places .shape{flex:none;width:26px;height:26px;font-size:13px;border-width:2px;box-shadow:none}
-footer{border-top:1px solid var(--line);padding:18px 0 28px;font-size:14px;color:var(--muted)}
-/* ---- v3 additions, each tied to COSC 2596 lectures ---- */
-#query{padding-right:76px}
-#clear{width:auto;padding:0 12px;font-size:15px;font-weight:600;color:var(--link);text-decoration:underline;text-underline-offset:3px}
-.skips{position:absolute;left:12px;top:-120px;z-index:10;display:flex;gap:8px}
-.skips:focus-within{top:10px}
-.skips a{background:var(--surface);color:var(--link);padding:10px 16px;border:2px solid var(--focus);border-radius:6px;font-weight:600}
-.error{color:#9e2316;font-weight:700;margin:6px 0 0;display:flex;gap:6px;align-items:center}
-.error[hidden],[hidden]{display:none !important}
-.error::before{content:"!";display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#9e2316;color:#fff;font-size:13px}
-#query[aria-invalid=true]{border-color:#9e2316;border-width:3px}
-nav.crumbs ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px;margin:0 0 10px;padding:0;font-size:15px;color:var(--muted)}
-nav.crumbs li+li::before{content:"›";margin:0 6px;color:var(--muted)}
-nav.crumbs button{min-height:44px}
-.summary{padding:6px 10px;border-radius:8px;transition:background-color .2s}
-.flash{animation:flash 1.6s ease-out}
-@keyframes flash{0%{background:var(--halo);box-shadow:0 0 0 2px var(--focus)}100%{background:transparent;box-shadow:none}}
-@media (prefers-reduced-motion:reduce){.flash{animation:none;background:var(--sel);box-shadow:0 0 0 2px var(--focus)}}
-.when{color:var(--ink);font-size:15px}
-.when strong{font-weight:700}
-.group-h{font-size:16px;margin:18px 0 8px;color:var(--muted)}
-.record{background:var(--sel);border:2px solid var(--ctl);border-radius:10px;padding:14px 16px;margin:14px 0}
-.record h2{font-size:17px;margin:0 0 6px}
-.record p{margin:0 0 10px}
-.purpose{font-weight:600;margin:12px 0 6px}
-.foot{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
-dialog{max-width:560px;width:calc(100% - 32px);border:2px solid var(--ctl);border-radius:12px;background:var(--surface);color:var(--ink);padding:22px 24px}
-dialog::backdrop{background:#2b1a1299}
+
+footer{border-top:1px solid var(--line);padding:16px 0 28px;font-size:14px;color:var(--muted)}
+
+/* shortcuts dialog */
+dialog{max-width:540px;width:calc(100% - 32px);border:1px solid var(--line);border-radius:18px;background:var(--paper);color:var(--ink);padding:24px 26px;box-shadow:0 20px 60px #2a102933}
+dialog::backdrop{background:#2a102966}
 dialog h2{margin:0 0 10px;font-size:22px}
 dialog table{border-collapse:collapse;width:100%;margin:8px 0 14px}
 dialog th,dialog td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
-kbd{display:inline-block;min-width:28px;text-align:center;padding:2px 7px;border:2px solid var(--ctl);border-bottom-width:3px;border-radius:6px;font:700 14px/1.4 ui-monospace,Consolas,monospace;background:var(--bg)}
+kbd{display:inline-block;min-width:28px;text-align:center;padding:2px 7px;border:1.5px solid var(--ctl);border-bottom-width:3px;border-radius:6px;font:700 14px/1.4 ui-monospace,Consolas,monospace;background:var(--bg)}
 .switch{display:flex;gap:10px;align-items:center;min-height:44px;font-weight:600}
 .switch input{width:22px;height:22px;accent-color:var(--brand)}
 </style>
 </head>
 <body>
-<div class="skips" id="skips"></div>
 <header>
-  <div class="wrap head">
-    <button class="brand" id="brand" type="button" aria-label="fieldnote home"><span class="mark" aria-hidden="true"></span>fieldnote.</button>
-    <form class="search" id="search-form" role="search" novalidate>
-      <label for="query">Search the campus index</label>
-      <div class="box">
-        <div class="field">
-          <input id="query" type="search" maxlength="120" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest" aria-describedby="query-hint">
-          <button type="button" id="clear" hidden>Clear</button>
-          <ul id="suggest" role="listbox" aria-label="Suggested searches" hidden></ul>
-        </div>
-        <button class="btn" type="submit" id="search-btn">Search</button>
-      </div>
-      <p class="error" id="query-error" hidden>Type at least one word, then press Enter or Search.</p>
-      <p class="hint" id="query-hint">Press Enter to search. Use the Down arrow key for suggestions.</p>
-    </form>
+  <div class="skips" id="skips"></div>
+  <div class="wrap top">
+    <button class="brand" id="brand" type="button" aria-label="fieldnote home">fieldnote</button>
+    <button class="linkbtn" id="open-keys" type="button">Keyboard shortcuts</button>
   </div>
 </header>
+<div class="wrap searchband">
+  <form class="search" id="search-form" role="search" novalidate>
+    <label for="query">Search the campus index</label>
+    <div class="box">
+      <div class="field">
+        <input id="query" type="search" maxlength="120" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest" aria-describedby="query-hint">
+        <ul id="suggest" role="listbox" aria-label="Suggested searches" hidden></ul>
+      </div>
+      <button type="button" id="clear" hidden>Clear</button>
+      <button class="btn" type="submit" id="search-btn">Search</button>
+    </div>
+    <p class="error" id="query-error" hidden>Type at least one word, then press Enter or Search.</p>
+    <p class="hint" id="query-hint">Press Enter to search. Down arrow shows suggestions.</p>
+  </form>
+</div>
 <main id="main" class="wrap" tabindex="-1"></main>
-<p id="status" class="sr-only" role="status" aria-live="polite"></p>
-<footer><div class="wrap foot"><span>Fieldnote Search · Fictional campus index · All entries are sample data · Accessible redesign prototype</span>
-  <button class="linkbtn" id="open-keys" type="button">Keyboard shortcuts</button></div></footer>
+<footer><p id="status" class="sr-only" role="status" aria-live="polite"></p><div class="wrap">Fieldnote Search · fictional campus index with sample data · accessible redesign prototype</div></footer>
 
 <dialog id="keys" aria-labelledby="keys-h">
   <h2 id="keys-h">Keyboard shortcuts</h2>
@@ -558,10 +555,10 @@ document.addEventListener("keydown", e => {
 
 /* ---------- pieces ---------- */
 function badges(e) {
-  const b = [`<span class="badge type">${esc(e.type.replace(/s$/, ""))}</span>`];
+  const b = [`<span>${esc(e.type.replace(/s$/, ""))}</span>`];
+  if (!e.campus && !/Off campus/.test(e.metadata)) b.push(`<span>Off campus</span>`);
   if (e.type === "Events") b.push(e.free ? `<span class="badge free">Free</span>` : `<span class="badge paid">Paid</span>`);
   if (isEnded(e)) b.push(`<span class="badge ended">Past event · ended</span>`);
-  if (!e.campus) b.push(`<span class="badge type">Off campus</span>`);
   return b.join("");
 }
 function whenOf(e) { return e.type === "Events" ? `<span class="when"><strong>When:</strong> ${esc(e.metadata)}</span>` : `<span>${esc(e.metadata)}</span>`; }
@@ -599,9 +596,9 @@ function summaryHTML(count) {
 }
 function controlsHTML() {
   return `<div class="controls" id="controls">
-    <div role="group" aria-labelledby="type-h"><h2 id="type-h">Result type</h2><div class="seg">
+    <div class="row" role="group" aria-labelledby="type-h"><span class="lbl" id="type-h">Type</span><div class="seg">
       ${categoryNames.map(c => `<button type="button" id="cat-${c}" data-cat="${c}" aria-pressed="${state.category === c}">${c}</button>`).join("")}</div></div>
-    <fieldset><legend>Show</legend><div class="radios">
+    <fieldset class="row"><legend>Show</legend><div class="seg">
       ${Object.entries(filterNames).map(([v, d]) => `<label><input type="radio" name="filter" id="f-${v}" value="${v}" ${state.filter === v ? "checked" : ""}>${d}</label>`).join("")}</div></fieldset>
   </div>`;
 }
@@ -610,18 +607,10 @@ function chipList(terms, label) {
 }
 function recentHTML() {
   const list = recent.filter(r => r.toLowerCase() !== (state.view === "home" ? "" : state.query.toLowerCase()));
-  return list.length ? `<h2 style="font-size:18px">Your recent searches</h2>${chipList(list, "Your recent searches")}` : "";
+  return list.length ? `<section><h2>Your recent searches</h2>${chipList(list, "Your recent searches")}</section>` : "";
 }
-function sidebarHTML() {
-  let out = "";
-  if (/bike|bicycle|cycling/i.test(state.query)) {
-    const quad = entries.find(e => e.id === "north-quad");
-    out += `<section class="card" aria-labelledby="quad-h"><p class="kicker">Campus map</p><h2 id="quad-h">North Quad cycling facilities</h2>
-      ${mapHTML(quad.map, true)}${placesList(quad.map)}
-      <button class="btn quiet" id="open-side-north-quad" data-open="north-quad">Open the North Quad map</button></section>`;
-  }
-  out += `<section class="card" aria-labelledby="rel-h"><h2 id="rel-h">Related searches</h2>${chipList(relatedFor(state.query), "Related searches")}</section>`;
-  return `<aside aria-label="More for this search">${out}</aside>`;
+function moreHTML() {
+  return `<section class="more" aria-labelledby="rel-h"><h2 id="rel-h">Related searches</h2>${chipList(relatedFor(state.query), "Related searches")}</section>`;
 }
 function setSkips(links) { $("skips").innerHTML = links.map(([href, text]) => `<a href="#" data-skip="${href}">${text}</a>`).join(""); }
 $("skips").addEventListener("click", e => {
@@ -633,70 +622,61 @@ $("skips").addEventListener("click", e => {
 function renderHome() {
   document.title = "Fieldnote – Search the campus index";
   setSkips([["view-title", "Skip to main content"]]);
-  main.innerHTML = `<div class="panel"><h1 id="view-title" tabindex="-1">Search the campus index</h1>
-    <p>Look up campus services, events, maps, and guides. Type in the search box above and press Enter, or start from a search below.</p>
-    ${recentHTML()}
-    <h2 style="font-size:18px">Popular searches</h2>${chipList(suggestions.slice(0, 5), "Popular searches")}
-    <p class="hint">Tip: press <kbd>?</kbd> for keyboard shortcuts.</p></div>`;
+  main.innerHTML = `<h1 id="view-title" tabindex="-1">Find campus services, events, maps and guides</h1>
+    <div class="stack">${recentHTML()}
+    <section><h2>Popular searches</h2>${chipList(suggestions.slice(0, 5), "Popular searches")}</section></div>`;
 }
 function resultItem(e) {
-  return `<li><p class="source">${esc(e.source)} › ${esc(e.path)}</p>
-    <h3 style="margin:2px 0 4px;font-size:20px;line-height:1.3"><button class="title" id="open-${e.id}" data-open="${e.id}">${esc(e.title)}</button></h3>
+  return `<li><h3><button class="title" id="open-${e.id}" data-open="${e.id}">${esc(e.title)}</button></h3>
     <p class="desc">${esc(e.snippet)}</p><p class="meta">${whenOf(e)}${badges(e)}</p></li>`;
 }
 function renderResults() {
   const results = filtered(), n = results.length, q = state.query;
   const title = n ? `${plural(n, "result")} for “${q}”` : `No results for “${q}”`;
   document.title = `${title} – Fieldnote`;
-  let body;
+  const filtersOn = state.category !== "All" || state.filter !== "all";
   if (!n) {
+    /* the way out comes first: no filters to Tab past when nothing is filtered */
     setSkips([["view-title", "Skip to main content"], ["edit-search", "Skip to search help"]]);
-    const filtersOn = state.category !== "All" || state.filter !== "all";
-    body = `<div class="panel" id="empty">
-      <p>Nothing in the campus index matched ${filtersOn ? "these words with the current type and filter" : "these words"}.</p>
-      ${filtersOn ? `<p><button class="btn" id="empty-reset" data-act="reset">Search again without type and filter</button></p>` : ""}
-      <h2 style="font-size:18px">Try one of these</h2>
-      <ul class="try"><li>Check the spelling of each word.</li><li>Use fewer or more general words, for example “bike” instead of “bike repair stand”.</li></ul>
-      <p><button class="btn quiet" id="edit-search" data-act="edit">Edit your search</button></p>
-      ${recentHTML()}
-      <h2 style="font-size:18px">Or search for</h2>${chipList(relatedFor(q), "Suggested searches")}</div>`;
-  } else {
-    setSkips([["@first", "Skip to results"], ["cat-" + state.category, "Skip to filters"]]);
-    const pages = Math.ceil(n / pageSize), p = Math.min(state.page, pages), start = (p - 1) * pageSize;
-    const slice = results.slice(start, start + pageSize);
-    const current = slice.filter(e => !isEnded(e)), past = slice.filter(isEnded);
-    const list = (items, label) => items.length ? `<ol class="results" aria-label="${esc(label)}">${items.map(resultItem).join("")}</ol>` : "";
-    const paging = pages > 1 ? `<nav class="pages" aria-label="Result pages"><span>Page ${p} of ${pages}:</span>${
-      Array.from({ length: pages }, (_, i) => `<button id="page-${i + 1}" data-page="${i + 1}" aria-label="Page ${i + 1}" ${i + 1 === p ? 'aria-current="page"' : ""}>${i + 1}</button>`).join("")}</nav>` : "";
-    body = `${list(current, past.length ? "Upcoming and current results" : `Results ${start + 1} to ${Math.min(start + pageSize, n)} of ${n}`)}
-      ${past.length ? `<h2 class="group-h" id="past-h">Past events (already happened)</h2>${list(past, "Past events")}` : ""}${paging}`;
+    main.innerHTML = `<h1 id="view-title" tabindex="-1">${esc(title)}</h1>
+      <div id="empty">
+      <p class="lead">Nothing in the campus index matched ${filtersOn ? "these words with the current type and filter" : "these words"}.</p>
+      <ul class="tips"><li>Check the spelling of each word.</li><li>Use fewer or more general words, for example “bike” instead of “bike repair stand”.</li></ul>
+      <div class="stack">
+      <p style="margin:0">${filtersOn ? `<button class="btn" id="empty-reset" data-act="reset">Search again without filters</button> ` : ""}<button class="btn${filtersOn ? " quiet" : ""}" id="edit-search" data-act="edit">Edit your search</button></p>
+      <section><h2>Or search for</h2>${chipList(relatedFor(q), "Suggested searches")}</section>
+      ${recentHTML()}</div></div>
+      ${filtersOn ? controlsHTML() + summaryHTML(n) : ""}`;
+    return;
   }
-  main.innerHTML = `${crumbs([{ label: "Home", to: "home" }, { label: `Results for “${q}”` }])}
-    <h1 id="view-title" tabindex="-1">${esc(title)}</h1>${controlsHTML()}${summaryHTML(n)}
-    <div class="layout"><div>${body}</div>${sidebarHTML()}</div>`;
+  setSkips([["@first", "Skip to results"], ["cat-" + state.category, "Skip to filters"]]);
+  const pages = Math.ceil(n / pageSize), p = Math.min(state.page, pages), start = (p - 1) * pageSize;
+  const slice = results.slice(start, start + pageSize);
+  const current = slice.filter(e => !isEnded(e)), past = slice.filter(isEnded);
+  const list = (items, label) => items.length ? `<ol class="results" aria-label="${esc(label)}">${items.map(resultItem).join("")}</ol>` : "";
+  const paging = pages > 1 ? `<nav class="pages" aria-label="Result pages"><span>Page ${p} of ${pages}</span>${
+    Array.from({ length: pages }, (_, i) => `<button id="page-${i + 1}" data-page="${i + 1}" aria-label="Page ${i + 1}" ${i + 1 === p ? 'aria-current="page"' : ""}>${i + 1}</button>`).join("")}</nav>` : "";
+  main.innerHTML = `<h1 id="view-title" tabindex="-1">${esc(title)}</h1>${controlsHTML()}${summaryHTML(n)}
+    <h2 class="sr-only">Results</h2>${list(current, past.length ? "Upcoming and current results" : `Results ${start + 1} to ${Math.min(start + pageSize, n)} of ${n}`)}
+    ${past.length ? `<h2 class="group-h" id="past-h">Past events (already happened)</h2>${list(past, "Past events")}` : ""}${paging}${moreHTML()}`;
 }
 function renderDetail() {
   const e = entries.find(x => x.id === state.item);
   document.title = `${e.title} – Fieldnote`;
   setSkips([["view-title", "Skip to main content"]]);
-  const facts = [["Source", e.source], [e.type === "Events" ? "Date and time" : "Details", e.metadata]];
+  const facts = [[e.type === "Events" ? "When" : "Details", e.metadata]];
   if (e.type === "Events") facts.push(["Cost", e.free ? "Free" : "Paid"]);
-  facts.push(["Location", e.campus ? "On campus" : "Off campus"]);
-  const record = e.type === "Events" ? `<section class="record" aria-labelledby="rec-h"><h2 id="rec-h">Event details to note</h2>
-      <p id="rec-text"><strong>${esc(e.title)}</strong><br>${esc(e.metadata)} · ${e.free ? "Free" : "Paid"}${isEnded(e) ? " · This event has ended" : ""}</p>
-      <button class="btn quiet" id="copy-btn" data-act="copy">Copy title, date and time</button></section>` : "";
-  main.innerHTML = `${crumbs([{ label: "Home", to: "home" }, { label: `Results for “${state.query}”`, to: "results" }, { label: e.title }])}
-    <div class="panel">
-    <p><button class="btn quiet" id="back" data-act="back">‹ Back to results</button></p>
+  facts.push(["Where", e.campus ? "On campus" : "Off campus"], ["From", e.source]);
+  const record = e.type === "Events" ? `<div class="record"><p id="rec-text">${esc(e.title)} — ${esc(e.metadata)} · ${e.free ? "Free" : "Paid"}${isEnded(e) ? " · This event has ended" : ""}</p>
+      <button class="btn quiet" id="copy-btn" data-act="copy">Copy title, date and time</button></div>` : "";
+  main.innerHTML = `<button class="linkbtn" id="back" data-act="back">‹ Back to results</button>
     <p class="kicker">${esc(e.type.replace(/s$/, ""))}</p>
     <h1 id="view-title" tabindex="-1">${esc(e.title)}</h1>
-    <p class="meta">${badges(e)}</p>
+    <dl class="facts">${facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
     ${record}
-    <dl class="facts">${facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
     <p>${esc(e.body)}</p>
     ${e.map ? `<figure style="margin:0"><figcaption><p class="purpose" id="map-purpose">${esc(mapPurpose(e))}</p></figcaption>${mapHTML(e.map, false)}</figure>
-      <h2 style="font-size:18px;margin-top:16px">Places on this map</h2>${placesList(e.map)}` : ""}
-  </div>`;
+      <h2 style="margin-top:18px">Places on this map</h2>${placesList(e.map)}` : ""}`;
 }
 function render() {
   closeSuggest();
