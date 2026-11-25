@@ -11,7 +11,7 @@ Single self-contained page (`index.html`), same sample data and ranking as the o
 - Free / Paid / Past event as text badges; type and filter controls always visible with their state.
 - Numbered, shaped, labelled map markers plus a text list of places.
 - Helpful no-results screen; labelled search box; headings, landmarks, page titles; screen-reader announcements; zoom allowed; responsive.
-- Chestnut and pale-yellow theme; all text meets WCAG 2.2 AA contrast.
+- Plum (#672367) and pale lilac theme; all text meets WCAG 2.2 AA contrast.
 
 ## Changes based on the COSC 2596 lectures
 | Lecture idea | Change |
