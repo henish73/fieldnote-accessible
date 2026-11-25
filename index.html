@@ -107,30 +107,83 @@ ol.places{padding:0;list-style:none;display:grid;gap:8px}
 ol.places li{display:flex;gap:10px;align-items:center}
 ol.places .shape{flex:none;width:26px;height:26px;font-size:13px;border-width:2px;box-shadow:none}
 footer{border-top:1px solid var(--line);padding:18px 0 28px;font-size:14px;color:var(--muted)}
+/* ---- v3 additions, each tied to COSC 2596 lectures ---- */
+#query{padding-right:76px}
+#clear{width:auto;padding:0 12px;font-size:15px;font-weight:600;color:var(--link);text-decoration:underline;text-underline-offset:3px}
+.skips{position:absolute;left:12px;top:-120px;z-index:10;display:flex;gap:8px}
+.skips:focus-within{top:10px}
+.skips a{background:var(--surface);color:var(--link);padding:10px 16px;border:2px solid var(--focus);border-radius:6px;font-weight:600}
+.error{color:#9e2316;font-weight:700;margin:6px 0 0;display:flex;gap:6px;align-items:center}
+.error[hidden],[hidden]{display:none !important}
+.error::before{content:"!";display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#9e2316;color:#fff;font-size:13px}
+#query[aria-invalid=true]{border-color:#9e2316;border-width:3px}
+nav.crumbs ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px;margin:0 0 10px;padding:0;font-size:15px;color:var(--muted)}
+nav.crumbs li+li::before{content:"›";margin:0 6px;color:var(--muted)}
+nav.crumbs button{min-height:44px}
+.summary{padding:6px 10px;border-radius:8px;transition:background-color .2s}
+.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%{background:var(--halo);box-shadow:0 0 0 2px var(--focus)}100%{background:transparent;box-shadow:none}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none;background:var(--sel);box-shadow:0 0 0 2px var(--focus)}}
+.when{color:var(--ink);font-size:15px}
+.when strong{font-weight:700}
+.group-h{font-size:16px;margin:18px 0 8px;color:var(--muted)}
+.record{background:var(--sel);border:2px solid var(--ctl);border-radius:10px;padding:14px 16px;margin:14px 0}
+.record h2{font-size:17px;margin:0 0 6px}
+.record p{margin:0 0 10px}
+.purpose{font-weight:600;margin:12px 0 6px}
+.foot{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
+dialog{max-width:560px;width:calc(100% - 32px);border:2px solid var(--ctl);border-radius:12px;background:var(--surface);color:var(--ink);padding:22px 24px}
+dialog::backdrop{background:#2b1a1299}
+dialog h2{margin:0 0 10px;font-size:22px}
+dialog table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+dialog th,dialog td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+kbd{display:inline-block;min-width:28px;text-align:center;padding:2px 7px;border:2px solid var(--ctl);border-bottom-width:3px;border-radius:6px;font:700 14px/1.4 ui-monospace,Consolas,monospace;background:var(--bg)}
+.switch{display:flex;gap:10px;align-items:center;min-height:44px;font-weight:600}
+.switch input{width:22px;height:22px;accent-color:var(--brand)}
 </style>
 </head>
 <body>
-<a class="skip" href="#main" id="skip">Skip to results</a>
+<div class="skips" id="skips"></div>
 <header>
   <div class="wrap head">
-    <button class="brand" id="brand" type="button" aria-label="Fieldnote home"><span class="mark" aria-hidden="true"></span>fieldnote.</button>
+    <button class="brand" id="brand" type="button" aria-label="fieldnote home"><span class="mark" aria-hidden="true"></span>fieldnote.</button>
     <form class="search" id="search-form" role="search" novalidate>
       <label for="query">Search the campus index</label>
       <div class="box">
         <div class="field">
           <input id="query" type="search" maxlength="120" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest" aria-describedby="query-hint">
-          <button type="button" id="clear" aria-label="Clear search text" hidden>×</button>
+          <button type="button" id="clear" hidden>Clear</button>
           <ul id="suggest" role="listbox" aria-label="Suggested searches" hidden></ul>
         </div>
-        <button class="btn" type="submit">Search</button>
+        <button class="btn" type="submit" id="search-btn">Search</button>
       </div>
+      <p class="error" id="query-error" hidden>Type at least one word, then press Enter or Search.</p>
       <p class="hint" id="query-hint">Press Enter to search. Use the Down arrow key for suggestions.</p>
     </form>
   </div>
 </header>
 <main id="main" class="wrap" tabindex="-1"></main>
 <p id="status" class="sr-only" role="status" aria-live="polite"></p>
-<footer><div class="wrap">Fieldnote Search · Fictional campus index · All entries are sample data · Accessible redesign prototype</div></footer>
+<footer><div class="wrap foot"><span>Fieldnote Search · Fictional campus index · All entries are sample data · Accessible redesign prototype</span>
+  <button class="linkbtn" id="open-keys" type="button">Keyboard shortcuts</button></div></footer>
+
+<dialog id="keys" aria-labelledby="keys-h">
+  <h2 id="keys-h">Keyboard shortcuts</h2>
+  <p>Single-key shortcuts work when you are not typing in the search box. Tab, Shift+Tab, Enter, Space and the arrow keys always work.</p>
+  <table>
+    <thead><tr><th scope="col">Key</th><th scope="col">What it does</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>/</kbd></td><td>Go to the search box</td></tr>
+      <tr><td><kbd>r</kbd></td><td>Go to the first result</td></tr>
+      <tr><td><kbd>f</kbd></td><td>Go to the type and filter choices</td></tr>
+      <tr><td><kbd>u</kbd></td><td>Undo the last type or filter change</td></tr>
+      <tr><td><kbd>?</kbd></td><td>Open this list</td></tr>
+      <tr><td><kbd>Alt</kbd> + <kbd>←</kbd></td><td>Browser Back: return to the previous view</td></tr>
+    </tbody>
+  </table>
+  <label class="switch"><input type="checkbox" id="keys-on" checked> Single-key shortcuts on</label>
+  <p><button class="btn" id="keys-close" type="button">Close</button></p>
+</dialog>
 
 <script>
 "use strict";
@@ -346,8 +399,46 @@ const pageSize = 5;
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const main = $("main"), queryField = $("query"), suggestBox = $("suggest"), clearBtn = $("clear"), statusEl = $("status");
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("fieldnote:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("fieldnote:" + k, JSON.stringify(v)); } catch {} },
+};
 
-let state = { view: "results", query: "campus bike repair", category: "All", filter: "all", page: 1, item: "" };
+/* ---------- state lives in the address (Lec 8: hypermedia, Back button, links that survive refresh) ---------- */
+const DEFAULT = { view: "results", query: defaultQuery, category: "All", filter: "all", page: 1, item: "" };
+let state = { ...DEFAULT };
+let undoState = null, undoLabel = "", recent = store.get("recent", []);
+let shortcutsOn = store.get("shortcuts", true);
+
+function toHash(s) {
+  if (s.view === "home") return "#home";
+  const p = new URLSearchParams({ q: s.query });
+  if (s.category !== "All") p.set("type", s.category);
+  if (s.filter !== "all") p.set("filter", s.filter);
+  if (s.page > 1) p.set("page", s.page);
+  if (s.view === "detail") p.set("item", s.item);
+  return "#" + p.toString();
+}
+function fromHash(h) {
+  h = (h || "").replace(/^#/, "");
+  if (h === "home") return { ...DEFAULT, view: "home" };
+  if (!h.includes("q=")) return null;
+  const p = new URLSearchParams(h);
+  const item = entries.some(e => e.id === p.get("item")) ? p.get("item") : "";
+  return {
+    view: item ? "detail" : "results",
+    query: (p.get("q") || defaultQuery).trim().slice(0, 120),
+    category: categoryNames.includes(p.get("type")) ? p.get("type") : "All",
+    filter: Object.hasOwn(filterNames, p.get("filter") || "") ? p.get("filter") : "all",
+    page: Math.max(1, parseInt(p.get("page"), 10) || 1),
+    item,
+  };
+}
+function writeHash() {
+  const h = toHash(state);
+  if (location.hash !== h) { try { history.pushState(null, "", h); } catch { /* sandboxed preview: in-page state still works */ } }
+}
 
 function rank(query) {
   const words = (query.toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).filter(w => w.length > 1);
@@ -364,31 +455,56 @@ function rank(query) {
   return out.sort((a, b) => b.score - a.score).map(m => m.entry);
 }
 const isEnded = e => /Ended/.test(e.metadata);
-function filtered() {
-  return rank(state.query).filter(e =>
-    (state.category === "All" || e.type === state.category) &&
-    (state.filter === "all" || (state.filter === "free" && e.free) || (state.filter === "campus" && e.campus)));
+function filtered(s = state) {
+  const list = rank(s.query).filter(e =>
+    (s.category === "All" || e.type === s.category) &&
+    (s.filter === "all" || (s.filter === "free" && e.free) || (s.filter === "campus" && e.campus)));
+  /* Lec 4 attention + Lec 2 error prevention: events that already happened go last, under their own heading */
+  return [...list.filter(e => !isEnded(e)), ...list.filter(isEnded)];
 }
 const relatedFor = q => { const t = relatedByTopic.find(g => g.test.test(q)); return (t ? t.terms : defaultRelated).filter(x => x !== q.toLowerCase()); };
 
-/* ---------- navigation: every change of view sets where focus goes ---------- */
-function go(changes, focusId, message) {
+/* ---------- navigation: every change of view says where focus goes ---------- */
+function go(changes, { focus, message, push = true, flash = false } = {}) {
   Object.assign(state, changes);
+  if (push) writeHash();
   render();
-  const target = (focusId && $(focusId)) || $("view-title");
+  const target = (focus && $(focus)) || $("view-title");
   if (target) target.focus();
+  if (flash) { const s = $("summary"); if (s) { s.classList.remove("flash"); void s.offsetWidth; s.classList.add("flash"); } }
   announce((typeof message === "function" ? message() : message) || $("view-title").textContent);
 }
 function announce(text) { statusEl.textContent = ""; setTimeout(() => { statusEl.textContent = text; }, 60); }
+function showError(on) {
+  $("query-error").hidden = !on;
+  queryField.setAttribute("aria-invalid", String(on));
+  queryField.setAttribute("aria-describedby", on ? "query-error query-hint" : "query-hint");
+}
 function runSearch(term) {
   const q = term.trim();
   closeSuggest();
-  if (!q) { go({ view: "home" }); return; }
+  /* Lec 8 user feedback: a correction message instead of silently doing nothing */
+  if (!q) { showError(true); queryField.focus(); announce($("query-error").textContent); return; }
+  showError(false);
   queryField.value = q; syncClear();
+  recent = [q, ...recent.filter(r => r.toLowerCase() !== q.toLowerCase())].slice(0, 5);
+  store.set("recent", recent);
+  undoState = null;
   go({ view: "results", query: q, category: "All", filter: "all", page: 1, item: "" });
 }
+/* Lec 8 consistency: "all user actions must be reversible" */
+function changeView(changes, label, focusId) {
+  undoState = { category: state.category, filter: state.filter, page: state.page };
+  undoLabel = "back to " + [undoState.category === "All" ? "all types" : undoState.category, undoState.filter !== "all" ? filterNames[undoState.filter] : ""].filter(Boolean).join(", ");
+  go(changes, { focus: focusId, flash: true, message: () => `${label}. ${plural(filtered().length, "result")}. Press U or use Undo to go back.` });
+}
+function undo() {
+  if (!undoState) return;
+  const prev = undoState; undoState = null;
+  go(prev, { focus: "view-title", flash: true, message: () => `Undone. ${plural(filtered().length, "result")}.` });
+}
 
-/* ---------- search box, suggestions (combobox pattern) ---------- */
+/* ---------- search box and suggestions (combobox pattern) ---------- */
 let active = -1, options = [];
 function openSuggest() {
   const term = queryField.value.trim().toLowerCase();
@@ -406,21 +522,39 @@ function highlight(i) {
   if (i >= 0) { queryField.setAttribute("aria-activedescendant", "opt-" + i); queryField.value = options[i]; }
 }
 const syncClear = () => { clearBtn.hidden = !queryField.value; };
-queryField.addEventListener("input", () => { openSuggest(); syncClear(); });
+queryField.addEventListener("input", () => { openSuggest(); syncClear(); if (queryField.value.trim()) showError(false); });
 queryField.addEventListener("keydown", e => {
   if (e.key === "ArrowDown") { if (suggestBox.hidden) openSuggest(); if (options.length) { e.preventDefault(); highlight((active + 1) % options.length); } }
   else if (e.key === "ArrowUp" && options.length && !suggestBox.hidden) { e.preventDefault(); highlight(active <= 0 ? options.length - 1 : active - 1); }
   else if (e.key === "Escape") { if (!suggestBox.hidden) { e.preventDefault(); closeSuggest(); } }
-  /* Enter is handled here directly, so it works even where form submission is blocked (e.g. sandboxed previews) */
+  /* Enter handled directly, so it works even where form submission is blocked (sandboxed previews) */
   else if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); runSearch(queryField.value); }
 });
 suggestBox.addEventListener("mousedown", e => { const li = e.target.closest("li"); if (li) { e.preventDefault(); runSearch(li.textContent); } });
 $("search-form").addEventListener("submit", e => { e.preventDefault(); runSearch(queryField.value); });
-document.querySelector("#search-form .btn").addEventListener("click", e => { e.preventDefault(); runSearch(queryField.value); });
+$("search-btn").addEventListener("click", e => { e.preventDefault(); runSearch(queryField.value); });
 clearBtn.addEventListener("click", () => { queryField.value = ""; syncClear(); closeSuggest(); queryField.focus(); announce("Search text cleared"); });
 queryField.addEventListener("blur", () => setTimeout(closeSuggest, 120));
 $("brand").addEventListener("click", () => go({ view: "home" }));
-$("skip").addEventListener("click", e => { e.preventDefault(); ($("view-title") || main).focus(); });
+
+/* ---------- keyboard shortcuts (Lec 8: keyboard equivalents; WCAG 2.1.4: can be turned off) ---------- */
+const dlg = $("keys");
+function openKeys() { $("keys-on").checked = shortcutsOn; try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } $("keys-close").focus(); }
+$("open-keys").addEventListener("click", openKeys);
+$("keys-close").addEventListener("click", () => { dlg.close(); $("open-keys").focus(); });
+$("keys-on").addEventListener("change", e => { shortcutsOn = e.target.checked; store.set("shortcuts", shortcutsOn); announce(shortcutsOn ? "Single-key shortcuts on" : "Single-key shortcuts off"); });
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || dlg.open) return;
+  const t = e.target;
+  if (t.matches("input[type=search], input[type=text], textarea, [contenteditable]")) return;
+  if (!shortcutsOn) return;
+  const k = e.key;
+  if (k === "/") { e.preventDefault(); queryField.focus(); queryField.select(); }
+  else if (k === "?") { e.preventDefault(); openKeys(); }
+  else if (k === "r" || k === "R") { const first = document.querySelector("ol.results .title"); if (first) { e.preventDefault(); first.focus(); } }
+  else if (k === "f" || k === "F") { const c = $("cat-" + state.category); if (c) { e.preventDefault(); c.focus(); } }
+  else if ((k === "u" || k === "U") && undoState) { e.preventDefault(); undo(); }
+});
 
 /* ---------- pieces ---------- */
 function badges(e) {
@@ -430,10 +564,17 @@ function badges(e) {
   if (!e.campus) b.push(`<span class="badge type">Off campus</span>`);
   return b.join("");
 }
+function whenOf(e) { return e.type === "Events" ? `<span class="when"><strong>When:</strong> ${esc(e.metadata)}</span>` : `<span>${esc(e.metadata)}</span>`; }
 function where(m) {
   const x = parseFloat(m.x), y = parseFloat(m.y);
   const v = y < 34 ? "top" : y > 66 ? "bottom" : "middle", h = x < 34 ? "left" : x > 66 ? "right" : "centre";
   return v === "middle" && h === "centre" ? "centre of the map" : `${v} ${h} of the map`;
+}
+/* Lec 9: the text alternative says why the map is there, not only what is drawn */
+function mapPurpose(e) {
+  const m = e.map.markers;
+  const parts = m.map((mk, i) => `${mk.label} is marker ${i + 1} (${SHAPES[i % 4]}, ${where(mk)})`);
+  return `What this map is for: ${e.snippet} ${parts.join("; ")}.`;
 }
 function mapHTML(map, small) {
   const pins = map.markers.map((m, i) => `<div class="pin" style="left:${m.x};top:${m.y}"><span class="shape s${i % 4}" style="background:${m.c}"><span>${i + 1}</span></span>${small ? "" : `<span class="tag">${esc(m.label)}</span>`}</div>`).join("");
@@ -442,21 +583,34 @@ function mapHTML(map, small) {
 function placesList(map) {
   return `<ol class="places">${map.markers.map((m, i) => `<li><span class="shape s${i % 4}" style="background:${m.c}" aria-hidden="true"><span>${i + 1}</span></span><span><strong>${i + 1}. ${esc(m.label)}</strong> — ${SHAPES[i % 4]} marker, ${where(m)}</span></li>`).join("")}</ol>`;
 }
+function crumbs(trail) {
+  return `<nav class="crumbs" aria-label="You are here"><ol>${trail.map((c, i) => i === trail.length - 1
+    ? `<li aria-current="page">${esc(c.label)}</li>`
+    : `<li><button class="linkbtn" data-crumb="${c.to}">${esc(c.label)}</button></li>`).join("")}</ol></nav>`;
+}
 function summaryHTML(count) {
   const parts = [];
   if (state.category !== "All") parts.push(`type <strong>${esc(state.category)}</strong>`);
   if (state.filter !== "all") parts.push(`<strong>${esc(filterNames[state.filter])}</strong>`);
-  const on = parts.length ? `Showing ${parts.join(" and ")}. ` : "Showing all types. ";
-  const reset = parts.length ? `<button class="linkbtn" data-act="reset">Show all results again</button>` : "";
-  return `<p class="summary">${on}${reset}</p>`;
+  const on = parts.length ? `Showing ${parts.join(" and ")}: ${plural(count, "result")}.` : `Showing all types: ${plural(count, "result")}.`;
+  const undoBtn = undoState ? ` <button class="linkbtn" id="undo-btn" data-act="undo">Undo: ${esc(undoLabel)}</button>` : "";
+  const reset = parts.length ? ` <button class="linkbtn" id="reset-btn" data-act="reset">Show all results again</button>` : "";
+  return `<p class="summary" id="summary">${on}${undoBtn}${reset}</p>`;
 }
 function controlsHTML() {
-  return `<div class="controls">
+  return `<div class="controls" id="controls">
     <div role="group" aria-labelledby="type-h"><h2 id="type-h">Result type</h2><div class="seg">
       ${categoryNames.map(c => `<button type="button" id="cat-${c}" data-cat="${c}" aria-pressed="${state.category === c}">${c}</button>`).join("")}</div></div>
     <fieldset><legend>Show</legend><div class="radios">
       ${Object.entries(filterNames).map(([v, d]) => `<label><input type="radio" name="filter" id="f-${v}" value="${v}" ${state.filter === v ? "checked" : ""}>${d}</label>`).join("")}</div></fieldset>
   </div>`;
+}
+function chipList(terms, label) {
+  return `<ul class="chips" aria-label="${esc(label)}">${terms.map(t => `<li><button data-q="${esc(t)}">${esc(t)}</button></li>`).join("")}</ul>`;
+}
+function recentHTML() {
+  const list = recent.filter(r => r.toLowerCase() !== (state.view === "home" ? "" : state.query.toLowerCase()));
+  return list.length ? `<h2 style="font-size:18px">Your recent searches</h2>${chipList(list, "Your recent searches")}` : "";
 }
 function sidebarHTML() {
   let out = "";
@@ -466,24 +620,37 @@ function sidebarHTML() {
       ${mapHTML(quad.map, true)}${placesList(quad.map)}
       <button class="btn quiet" id="open-side-north-quad" data-open="north-quad">Open the North Quad map</button></section>`;
   }
-  out += `<section class="card" aria-labelledby="rel-h"><h2 id="rel-h">Related searches</h2><ul class="chips">
-    ${relatedFor(state.query).map(t => `<li><button data-q="${esc(t)}">${esc(t)}</button></li>`).join("")}</ul></section>`;
+  out += `<section class="card" aria-labelledby="rel-h"><h2 id="rel-h">Related searches</h2>${chipList(relatedFor(state.query), "Related searches")}</section>`;
   return `<aside aria-label="More for this search">${out}</aside>`;
 }
+function setSkips(links) { $("skips").innerHTML = links.map(([href, text]) => `<a href="#" data-skip="${href}">${text}</a>`).join(""); }
+$("skips").addEventListener("click", e => {
+  const a = e.target.closest("a[data-skip]"); if (!a) return;
+  e.preventDefault(); const t = a.dataset.skip === "@first" ? main.querySelector("ol.results .title") : $(a.dataset.skip); if (t) t.focus();
+});
 
 /* ---------- views ---------- */
 function renderHome() {
   document.title = "Fieldnote – Search the campus index";
+  setSkips([["view-title", "Skip to main content"]]);
   main.innerHTML = `<div class="panel"><h1 id="view-title" tabindex="-1">Search the campus index</h1>
-    <p>Look up campus services, events, maps, and guides. Type in the search box above and press Enter, or start from a popular search.</p>
-    <h2 style="font-size:18px">Popular searches</h2><ul class="chips">${suggestions.slice(0, 5).map(t => `<li><button data-q="${esc(t)}">${esc(t)}</button></li>`).join("")}</ul></div>`;
+    <p>Look up campus services, events, maps, and guides. Type in the search box above and press Enter, or start from a search below.</p>
+    ${recentHTML()}
+    <h2 style="font-size:18px">Popular searches</h2>${chipList(suggestions.slice(0, 5), "Popular searches")}
+    <p class="hint">Tip: press <kbd>?</kbd> for keyboard shortcuts.</p></div>`;
+}
+function resultItem(e) {
+  return `<li><p class="source">${esc(e.source)} › ${esc(e.path)}</p>
+    <h3 style="margin:2px 0 4px;font-size:20px;line-height:1.3"><button class="title" id="open-${e.id}" data-open="${e.id}">${esc(e.title)}</button></h3>
+    <p class="desc">${esc(e.snippet)}</p><p class="meta">${whenOf(e)}${badges(e)}</p></li>`;
 }
 function renderResults() {
   const results = filtered(), n = results.length, q = state.query;
-  const title = n ? `${n} result${n === 1 ? "" : "s"} for “${q}”` : `No results for “${q}”`;
+  const title = n ? `${plural(n, "result")} for “${q}”` : `No results for “${q}”`;
   document.title = `${title} – Fieldnote`;
   let body;
   if (!n) {
+    setSkips([["view-title", "Skip to main content"], ["edit-search", "Skip to search help"]]);
     const filtersOn = state.category !== "All" || state.filter !== "all";
     body = `<div class="panel" id="empty">
       <p>Nothing in the campus index matched ${filtersOn ? "these words with the current type and filter" : "these words"}.</p>
@@ -491,34 +658,43 @@ function renderResults() {
       <h2 style="font-size:18px">Try one of these</h2>
       <ul class="try"><li>Check the spelling of each word.</li><li>Use fewer or more general words, for example “bike” instead of “bike repair stand”.</li></ul>
       <p><button class="btn quiet" id="edit-search" data-act="edit">Edit your search</button></p>
-      <h2 style="font-size:18px">Or search for</h2>
-      <ul class="chips">${relatedFor(q).map(t => `<li><button data-q="${esc(t)}">${esc(t)}</button></li>`).join("")}</ul></div>`;
+      ${recentHTML()}
+      <h2 style="font-size:18px">Or search for</h2>${chipList(relatedFor(q), "Suggested searches")}</div>`;
   } else {
+    setSkips([["@first", "Skip to results"], ["cat-" + state.category, "Skip to filters"]]);
     const pages = Math.ceil(n / pageSize), p = Math.min(state.page, pages), start = (p - 1) * pageSize;
-    const items = results.slice(start, start + pageSize).map(e => `<li><p class="source">${esc(e.source)} › ${esc(e.path)}</p>
-      <h2><button class="title" id="open-${e.id}" data-open="${e.id}">${esc(e.title)}</button></h2>
-      <p class="desc">${esc(e.snippet)}</p><p class="meta">${badges(e)}<span>${esc(e.metadata)}</span></p></li>`).join("");
+    const slice = results.slice(start, start + pageSize);
+    const current = slice.filter(e => !isEnded(e)), past = slice.filter(isEnded);
+    const list = (items, label) => items.length ? `<ol class="results" aria-label="${esc(label)}">${items.map(resultItem).join("")}</ol>` : "";
     const paging = pages > 1 ? `<nav class="pages" aria-label="Result pages"><span>Page ${p} of ${pages}:</span>${
       Array.from({ length: pages }, (_, i) => `<button id="page-${i + 1}" data-page="${i + 1}" aria-label="Page ${i + 1}" ${i + 1 === p ? 'aria-current="page"' : ""}>${i + 1}</button>`).join("")}</nav>` : "";
-    body = `<ol class="results" aria-label="Search results, ${start + 1} to ${Math.min(start + pageSize, n)} of ${n}">${items}</ol>${paging}`;
+    body = `${list(current, past.length ? "Upcoming and current results" : `Results ${start + 1} to ${Math.min(start + pageSize, n)} of ${n}`)}
+      ${past.length ? `<h2 class="group-h" id="past-h">Past events (already happened)</h2>${list(past, "Past events")}` : ""}${paging}`;
   }
-  main.innerHTML = `<h1 id="view-title" tabindex="-1">${esc(title)}</h1>${controlsHTML()}${summaryHTML(n)}
+  main.innerHTML = `${crumbs([{ label: "Home", to: "home" }, { label: `Results for “${q}”` }])}
+    <h1 id="view-title" tabindex="-1">${esc(title)}</h1>${controlsHTML()}${summaryHTML(n)}
     <div class="layout"><div>${body}</div>${sidebarHTML()}</div>`;
 }
 function renderDetail() {
   const e = entries.find(x => x.id === state.item);
   document.title = `${e.title} – Fieldnote`;
+  setSkips([["view-title", "Skip to main content"]]);
   const facts = [["Source", e.source], [e.type === "Events" ? "Date and time" : "Details", e.metadata]];
   if (e.type === "Events") facts.push(["Cost", e.free ? "Free" : "Paid"]);
   facts.push(["Location", e.campus ? "On campus" : "Off campus"]);
-  main.innerHTML = `<div class="panel">
-    <p><button class="linkbtn" id="back" data-act="back">‹ Back to results for “${esc(state.query)}”</button></p>
+  const record = e.type === "Events" ? `<section class="record" aria-labelledby="rec-h"><h2 id="rec-h">Event details to note</h2>
+      <p id="rec-text"><strong>${esc(e.title)}</strong><br>${esc(e.metadata)} · ${e.free ? "Free" : "Paid"}${isEnded(e) ? " · This event has ended" : ""}</p>
+      <button class="btn quiet" id="copy-btn" data-act="copy">Copy title, date and time</button></section>` : "";
+  main.innerHTML = `${crumbs([{ label: "Home", to: "home" }, { label: `Results for “${state.query}”`, to: "results" }, { label: e.title }])}
+    <div class="panel">
+    <p><button class="btn quiet" id="back" data-act="back">‹ Back to results</button></p>
     <p class="kicker">${esc(e.type.replace(/s$/, ""))}</p>
     <h1 id="view-title" tabindex="-1">${esc(e.title)}</h1>
     <p class="meta">${badges(e)}</p>
+    ${record}
     <dl class="facts">${facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
     <p>${esc(e.body)}</p>
-    ${e.map ? `<figure style="margin:0"><figcaption class="kicker">Map: ${esc(e.map.labels[0])}. Every marker is numbered and named; the list below the map describes each one.</figcaption>${mapHTML(e.map, false)}</figure>
+    ${e.map ? `<figure style="margin:0"><figcaption><p class="purpose" id="map-purpose">${esc(mapPurpose(e))}</p></figcaption>${mapHTML(e.map, false)}</figure>
       <h2 style="font-size:18px;margin-top:16px">Places on this map</h2>${placesList(e.map)}` : ""}
   </div>`;
 }
@@ -527,22 +703,27 @@ function render() {
   if (state.view === "home") { queryField.value = ""; renderHome(); }
   else { queryField.value = state.query; state.view === "detail" ? renderDetail() : renderResults(); }
   syncClear();
-  $("skip").textContent = state.view === "results" ? "Skip to results" : "Skip to main content";
 }
 
-const countMsg = label => { const n = filtered().length; return `${label}: ${n} result${n === 1 ? "" : "s"}`; };
-
 /* ---------- one handler for every control in the page ---------- */
+let returnTo = "";
 main.addEventListener("click", ev => {
   const t = ev.target.closest("button");
   if (!t) return;
   if (t.dataset.q) runSearch(t.dataset.q);
-  else if (t.dataset.open) go({ view: "detail", item: t.dataset.open, returnTo: t.id });
-  else if (t.dataset.cat) go({ category: t.dataset.cat, page: 1 }, "cat-" + t.dataset.cat, () => countMsg(t.dataset.cat));
-  else if (t.dataset.page) go({ page: +t.dataset.page }, null, `Page ${t.dataset.page}`);
-  else if (t.dataset.act === "reset") go({ category: "All", filter: "all", page: 1 });
+  else if (t.dataset.open) { returnTo = t.id; go({ view: "detail", item: t.dataset.open }); }
+  else if (t.dataset.cat) { if (t.dataset.cat !== state.category) changeView({ category: t.dataset.cat, page: 1 }, `type ${t.dataset.cat}`, "cat-" + t.dataset.cat); }
+  else if (t.dataset.page) go({ page: +t.dataset.page }, { message: `Page ${t.dataset.page}` });
+  else if (t.dataset.crumb === "home") go({ view: "home" });
+  else if (t.dataset.crumb === "results" || t.dataset.act === "back") go({ view: "results", item: "" }, { focus: returnTo, message: "Back to results" });
+  else if (t.dataset.act === "reset") changeView({ category: "All", filter: "all", page: 1 }, "all types and results", "view-title");
+  else if (t.dataset.act === "undo") undo();
   else if (t.dataset.act === "edit") { queryField.focus(); queryField.select(); }
-  else if (t.dataset.act === "back") go({ view: "results", item: "" }, state.returnTo, "Back to results");
+  else if (t.dataset.act === "copy") {
+    const text = $("rec-text").innerText.replace(/\n/g, " — ");
+    const done = ok => { t.textContent = ok ? "Copied ✓ — paste it into your notes" : "Couldn't copy here — select the text above instead"; announce(t.textContent); };
+    try { navigator.clipboard.writeText(text).then(() => done(true), () => done(false)); } catch { done(false); }
+  }
 });
 /* Enter on a radio choice selects it too (radios natively only respond to arrows and Space) */
 main.addEventListener("keydown", ev => {
@@ -553,9 +734,18 @@ main.addEventListener("keydown", ev => {
 main.addEventListener("change", ev => {
   if (ev.target.name !== "filter") return;
   const v = ev.target.value;
-  go({ filter: v, page: 1 }, "f-" + v, () => countMsg(filterNames[v]));
+  changeView({ filter: v, page: 1 }, filterNames[v], "f-" + v);
 });
 
+/* Browser Back / Forward (Lec 8: users cannot control the order of access; the Back button must work) */
+window.addEventListener("popstate", () => {
+  const next = fromHash(location.hash); if (!next) return;
+  const fromDetail = state.view === "detail" ? state.item : "";
+  undoState = null;
+  go(next, { push: false, focus: fromDetail && next.view === "results" ? "open-" + fromDetail : null });
+});
+
+state = fromHash(location.hash) || { ...DEFAULT };
 render();
 }
 </script>
