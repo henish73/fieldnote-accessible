@@ -1,6 +1,6 @@
 # Fieldnote redesign test report
 
-Run: 2026-11-25 18:31 - headless Microsoft Edge - https://henish73.github.io/fieldnote-accessible/?v=4
+Run: 2026-11-25 19:09 - headless Microsoft Edge - https://henish73.github.io/fieldnote-accessible/?v=7
 
 **92 passed, 0 failed** (92 tests)
 
@@ -100,8 +100,8 @@ Run: 2026-11-25 18:31 - headless Microsoft Edge - https://henish73.github.io/fie
 | PASS | Event page: every control shows a focus indicator | []|
 | PASS | Map page: every control is at least 44x44 px | []|
 | PASS | Map page: every control shows a focus indicator | []|
-| PASS | Spacing: no overlapping blocks in the results page | gaps px: [18,12,6,26,0,28]|
-| PASS | Alignment: search, heading, filters and results share one left edge | left x: [190,190,190,190]|
+| PASS | Spacing: no overlapping blocks in the results page | gaps px: [18]|
+| PASS | Alignment: search, heading and filters share one left edge | left x: [44,44,44]|
 | PASS | Readable body text: line height at least 1.5, size at least 16 px | 1.60 / 17px|
 | PASS | Line length stays readable (under ~90 characters) | about 84 characters per line|
 | PASS | Reflow at 320 px (= 400%/200% zoom): no sideways scroll on Home | overflow 0 px|
