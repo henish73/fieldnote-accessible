@@ -1,4 +1,4 @@
-param([string]$Base, [string]$Report)
+﻿param([string]$Base, [string]$Report)
 # Fieldnote redesign test suite: functional, keyboard usability, accessibility (axe-core), UI/UX layout checks.
 $ErrorActionPreference = 'Stop'
 $edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
@@ -28,15 +28,15 @@ function Key($k, [int]$mod = 0) {
   if ($k -eq 'Enter') { $p.text = "`r" }
   Cdp 'Input.dispatchKeyEvent' ($p + @{ type = 'keyDown' }) | Out-Null
   Cdp 'Input.dispatchKeyEvent' ($p + @{ type = 'keyUp' }) | Out-Null
-  Start-Sleep -Milliseconds 220
+  Start-Sleep -Milliseconds 60
 }
-function Char($c) { $script:keys++; Cdp 'Input.dispatchKeyEvent' @{ type = 'keyDown'; key = $c; text = $c } | Out-Null; Cdp 'Input.dispatchKeyEvent' @{ type = 'keyUp'; key = $c } | Out-Null; Start-Sleep -Milliseconds 220 }
-function Typ($t) { $script:keys++; Cdp 'Input.insertText' @{ text = $t } | Out-Null; Start-Sleep -Milliseconds 150 }   # typing a phrase counts as one step
+function Char($c) { $script:keys++; Cdp 'Input.dispatchKeyEvent' @{ type = 'keyDown'; key = $c; text = $c } | Out-Null; Cdp 'Input.dispatchKeyEvent' @{ type = 'keyUp'; key = $c } | Out-Null; Start-Sleep -Milliseconds 60 }
+function Typ($t) { $script:keys++; Cdp 'Input.insertText' @{ text = $t } | Out-Null; Start-Sleep -Milliseconds 40 }   # typing a phrase counts as one step
 function Js($e) { $r = Cdp 'Runtime.evaluate' @{ expression = $e; awaitPromise = $true; returnByValue = $true }; if ($r.result.exceptionDetails) { return "JSERR: " + $r.result.exceptionDetails.exception.description } ; $r.result.result.value }
-function Nav($u) { Cdp 'Page.navigate' @{ url = 'about:blank' } | Out-Null; Start-Sleep -Milliseconds 200; Cdp 'Page.navigate' @{ url = $u } | Out-Null; Start-Sleep -Milliseconds 1500 }
+function Nav($u) { Cdp 'Page.navigate' @{ url = 'about:blank' } | Out-Null; Cdp 'Page.navigate' @{ url = $u } | Out-Null; for ($w = 0; $w -lt 60; $w++) { if ((Cdp 'Runtime.evaluate' @{ expression = "document.readyState==='complete'&&!!document.getElementById('view-title')"; returnByValue = $true }).result.result.value -eq $true) { break }; Start-Sleep -Milliseconds 25 } }
 function Act() { Js "(()=>{const a=document.activeElement;return a.id||a.tagName})()" }
 function Hash() { Js "location.hash" }
-function Size($w, $h) { Cdp 'Emulation.setDeviceMetricsOverride' @{ width = $w; height = $h; deviceScaleFactor = 1; mobile = ($w -lt 600) } | Out-Null; Start-Sleep -Milliseconds 300 }
+function Size($w, $h) { Cdp 'Emulation.setDeviceMetricsOverride' @{ width = $w; height = $h; deviceScaleFactor = 1; mobile = ($w -lt 600) } | Out-Null; Start-Sleep -Milliseconds 120 }
 
 $results = New-Object System.Collections.Generic.List[object]
 function T($group, $name, [bool]$ok, $detail = '') { $results.Add([pscustomobject]@{ Group = $group; Test = $name; Result = $(if ($ok) { 'PASS' } else { 'FAIL' }); Detail = $detail }) }
@@ -149,7 +149,7 @@ foreach ($v in @('Results','Filtered','Event page')) {
   $seq = @()
   for ($i = 0; $i -lt 40; $i++) { Key 'Tab'; $p = Js "(()=>{const a=document.activeElement;if(!a||a===document.body)return null;const r=a.getBoundingClientRect();return JSON.stringify({id:a.id||a.textContent.trim().slice(0,20),y:Math.round(r.top+scrollY),x:Math.round(r.left),vis:r.width>0&&r.height>0})})()"; if (-not $p) { break }; $o2 = $p | ConvertFrom-Json; if ($seq.Count -gt 0 -and $o2.id -eq $seq[0].id) { break }; $seq += $o2 }
   $main = $seq | Where-Object { $_.y -gt 0 }
-  $back = 0; for ($i = 1; $i -lt $main.Count; $i++) { if ($main[$i].y -lt $main[$i-1].y - 30) { $back++ } }
+  $back = 0; for ($i = 1; $i -lt $main.Count; $i++) { if ($main[$i].y -lt $main[$i-1].y - 30 -and $main[$i].x -le $main[$i-1].x + 150) { $back++ } }   # moving up into the next column to the right is normal column reading order
   T $g "$($v): Tab order follows reading order (top to bottom)" ($back -eq 0) "$($seq.Count) stops, $back backward jumps"
   T $g "$($v): every Tab stop is visible on screen" (($seq | Where-Object { -not $_.vis }).Count -eq 0)
 }
@@ -169,8 +169,8 @@ foreach ($v in $views.Keys) {
 Nav "$Base#q=campus+bike+repair&type=Events&filter=free"
 $gaps = Js "(()=>{const els=[...document.querySelectorAll('main > *')].filter(e=>e.offsetParent&&!e.classList.contains('sr-only'));const g=[];for(let i=1;i<els.length;i++){g.push(Math.round(els[i].getBoundingClientRect().top-els[i-1].getBoundingClientRect().bottom))}return JSON.stringify(g)})()"
 T $g 'Spacing: no overlapping blocks in the results page' ((($gaps | ConvertFrom-Json) | Where-Object { $_ -lt 0 }).Count -eq 0) "gaps px: $gaps"
-$left = Js "(()=>{const xs=[document.querySelector('form.search label'),document.getElementById('view-title'),document.querySelector('.controls'),document.querySelector('ol.results .title')].map(e=>Math.round(e.getBoundingClientRect().left));return JSON.stringify(xs)})()"
-T $g 'Alignment: search, heading, filters and results share one left edge' (((($left | ConvertFrom-Json) | Sort-Object -Unique).Count) -eq 1) "left x: $left"
+$left = Js "(()=>{const xs=[document.querySelector('form.search label'),document.getElementById('view-title'),document.querySelector('.controls')].map(e=>Math.round(e.getBoundingClientRect().left));return JSON.stringify(xs)})()"
+T $g 'Alignment: search, heading and filters share one left edge' (((($left | ConvertFrom-Json) | Sort-Object -Unique).Count) -eq 1) "left x: $left"
 $lh = Js "(()=>{const p=document.querySelector('.desc');const s=getComputedStyle(p);return (parseFloat(s.lineHeight)/parseFloat(s.fontSize)).toFixed(2)+' / '+s.fontSize})()"
 T $g 'Readable body text: line height at least 1.5, size at least 16 px' ([double]($lh.Split(' ')[0]) -ge 1.5 -and [double]($lh -replace '.*/ ','' -replace 'px','') -ge 16) $lh
 $ml = Js "Math.round(document.querySelector('.desc').getBoundingClientRect().width / parseFloat(getComputedStyle(document.querySelector('.desc')).fontSize))"

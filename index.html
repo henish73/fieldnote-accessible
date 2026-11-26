@@ -19,7 +19,22 @@ body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,"Seg
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 [hidden]{display:none !important}
 button{font:inherit;color:inherit}
-.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.wrap{width:100%;max-width:1320px;margin:0 auto;padding:0 clamp(20px,4vw,56px)}
+body{min-height:100vh;display:flex;flex-direction:column}
+main{flex:1 0 auto;width:100%}
+form.search{max-width:900px}
+main p,main .tips,.facts,.record,figure,ol.places{max-width:860px}
+.layout{display:grid;gap:8px}
+.content{min-width:0;max-width:900px}
+@media (min-width:1000px){
+  .layout{grid-template-columns:250px minmax(0,1fr);gap:56px;align-items:start}
+  .rail .controls{position:sticky;top:20px;gap:22px}
+  .rail .row{display:grid;gap:8px}
+  .rail .row .lbl,.rail .row legend{float:none;width:auto}
+  .rail .seg{display:grid;border-radius:22px;padding:6px;gap:4px}
+  .rail .seg button,.rail .seg label{justify-content:flex-start;width:100%}
+  .rail + .content .summary{margin-top:0}
+}
 
 /* skip links */
 .skips{position:absolute;left:12px;top:-120px;z-index:10;display:flex;gap:8px}
@@ -111,19 +126,20 @@ nav.pages button[aria-current=page]{background:var(--brand);color:var(--on-brand
 .record{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:0 0 18px}
 .record p{margin:0;font-weight:600}
 .purpose{font-weight:600;margin:18px 0 8px}
-.map{position:relative;height:240px;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+.map{position:relative;height:300px;border-radius:14px;overflow:hidden;border:1px solid var(--line);
   background:repeating-linear-gradient(24deg,#e3ead9 0 34px,#e9efe2 34px 73px,#dfe7d8 73px 105px)}
 .road{position:absolute;width:125%;height:17px;background:#fafaf4;border:1px solid #cfd7c8}
 .r1{left:-12%;top:28%;transform:rotate(-13deg)}.r2{left:-8%;top:62%;transform:rotate(10deg)}.r3{left:-12%;top:46%;transform:rotate(-66deg)}
 .area{position:absolute;font-size:12px;font-weight:700;color:#2f4a2c;background:#ffffffcc;padding:1px 6px;border-radius:4px}
 .a1{left:10px;top:8px}.a2{left:10px;bottom:8px}
-.pin{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px}
-.shape{width:30px;height:30px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;border:3px solid #fff;box-shadow:0 1px 4px #0006}
+.pin{position:absolute;transform:translate(-22px,-50%);display:flex;align-items:center;gap:8px}
+.shape{width:44px;height:44px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px;border:3px solid #fff;box-shadow:0 2px 6px #0007}
 .s0{border-radius:50%}.s1{border-radius:4px}.s2{transform:rotate(45deg);border-radius:3px}.s2 span{transform:rotate(-45deg)}.s3{border-radius:50% 50% 4px 4px}
-.pin .tag{background:#fff;color:#172033;font-size:13px;font-weight:700;padding:2px 7px;border-radius:5px;border:1px solid #9aa5b8;white-space:nowrap}
+.pin.flip{flex-direction:row-reverse;transform:translate(calc(-100% + 22px),-50%)}
+.pin .tag{background:#fff;color:#172033;font-size:15px;font-weight:700;padding:4px 9px;border-radius:5px;border:1px solid #9aa5b8;white-space:nowrap}
 ol.places{padding:0;list-style:none;display:grid;gap:8px;margin:12px 0 0}
 ol.places li{display:flex;gap:10px;align-items:center}
-ol.places .shape{flex:none;width:26px;height:26px;font-size:13px;border-width:2px;box-shadow:none}
+ol.places .shape{flex:none;width:34px;height:34px;font-size:16px;border-width:2px;box-shadow:none}
 
 footer{border-top:1px solid var(--line);padding:16px 0 28px;font-size:14px;color:var(--muted)}
 
@@ -574,7 +590,7 @@ function mapPurpose(e) {
   return `What this map is for: ${e.snippet} ${parts.join("; ")}.`;
 }
 function mapHTML(map, small) {
-  const pins = map.markers.map((m, i) => `<div class="pin" style="left:${m.x};top:${m.y}"><span class="shape s${i % 4}" style="background:${m.c}"><span>${i + 1}</span></span>${small ? "" : `<span class="tag">${esc(m.label)}</span>`}</div>`).join("");
+  const pins = map.markers.map((m, i) => `<div class="pin${parseFloat(m.x) > 55 ? " flip" : ""}" style="left:${m.x};top:${m.y}"><span class="shape s${i % 4}" style="background:${m.c}"><span>${i + 1}</span></span>${small ? "" : `<span class="tag">${esc(m.label)}</span>`}</div>`).join("");
   return `<div class="map" aria-hidden="true"><span class="road r1"></span><span class="road r2"></span><span class="road r3"></span><span class="area a1">${esc(map.labels[0])}</span><span class="area a2">${esc(map.labels[1])}</span>${pins}</div>`;
 }
 function placesList(map) {
@@ -656,9 +672,11 @@ function renderResults() {
   const list = (items, label) => items.length ? `<ol class="results" aria-label="${esc(label)}">${items.map(resultItem).join("")}</ol>` : "";
   const paging = pages > 1 ? `<nav class="pages" aria-label="Result pages"><span>Page ${p} of ${pages}</span>${
     Array.from({ length: pages }, (_, i) => `<button id="page-${i + 1}" data-page="${i + 1}" aria-label="Page ${i + 1}" ${i + 1 === p ? 'aria-current="page"' : ""}>${i + 1}</button>`).join("")}</nav>` : "";
-  main.innerHTML = `<h1 id="view-title" tabindex="-1">${esc(title)}</h1>${controlsHTML()}${summaryHTML(n)}
+  main.innerHTML = `<h1 id="view-title" tabindex="-1">${esc(title)}</h1>
+    <div class="layout"><div class="rail">${controlsHTML()}</div>
+    <div class="content">${summaryHTML(n)}
     <h2 class="sr-only">Results</h2>${list(current, past.length ? "Upcoming and current results" : `Results ${start + 1} to ${Math.min(start + pageSize, n)} of ${n}`)}
-    ${past.length ? `<h2 class="group-h" id="past-h">Past events (already happened)</h2>${list(past, "Past events")}` : ""}${paging}${moreHTML()}`;
+    ${past.length ? `<h2 class="group-h" id="past-h">Past events (already happened)</h2>${list(past, "Past events")}` : ""}${paging}${moreHTML()}</div></div>`;
 }
 function renderDetail() {
   const e = entries.find(x => x.id === state.item);
@@ -692,7 +710,10 @@ main.addEventListener("click", ev => {
   if (!t) return;
   if (t.dataset.q) runSearch(t.dataset.q);
   else if (t.dataset.open) { returnTo = t.id; go({ view: "detail", item: t.dataset.open }); }
-  else if (t.dataset.cat) { if (t.dataset.cat !== state.category) changeView({ category: t.dataset.cat, page: 1 }, `type ${t.dataset.cat}`, "cat-" + t.dataset.cat); }
+  else if (t.dataset.cat) {
+    if (t.dataset.cat !== state.category) changeView({ category: t.dataset.cat, page: 1 }, `type ${t.dataset.cat}`, "cat-" + t.dataset.cat);
+    else { const s = $("summary"); if (s) { s.classList.remove("flash"); void s.offsetWidth; s.classList.add("flash"); } announce(`Already showing ${t.dataset.cat === "All" ? "all types" : t.dataset.cat}. ${plural(filtered().length, "result")}.`); }
+  }
   else if (t.dataset.page) go({ page: +t.dataset.page }, { message: `Page ${t.dataset.page}` });
   else if (t.dataset.crumb === "home") go({ view: "home" });
   else if (t.dataset.crumb === "results" || t.dataset.act === "back") go({ view: "results", item: "" }, { focus: returnTo, message: "Back to results" });
